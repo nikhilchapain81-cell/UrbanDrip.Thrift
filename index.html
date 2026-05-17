@@ -2616,4 +2616,92 @@ window.state = state;
 initRoute();
 </script>
 </body>
+  <div class="form-container" style="max-width: 400px; margin: 40px auto; padding: 30px; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); font-family: -apple-system, sans-serif; color: #1a1a1a;">
+  <h2 style="font-weight: 600; letter-spacing: -0.5px; margin-bottom: 24px; text-transform: uppercase; font-size: 1.2rem;">Add New Drop Item</h2>
+  
+  <div class="form-group" style="margin-bottom: 16px;">
+    <label style="display: block; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; color: #666;">Item Name</label>
+    <input type="text" id="itemName" placeholder="e.g., Vintage Oversized Hoodie" style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 6px; box-sizing: border-box; font-size: 1rem; background: #fcfcfc;">
+  </div>
+
+  <div class="form-group" style="margin-bottom: 16px;">
+    <label style="display: block; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; color: #666;">Price (INR)</label>
+    <input type="number" id="itemPrice" placeholder="e.g., 999" style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 6px; box-sizing: border-box; font-size: 1rem; background: #fcfcfc;">
+  </div>
+
+  <div class="form-group" style="margin-bottom: 16px;">
+    <label style="display: block; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; color: #666;">Size</label>
+    <input type="text" id="itemSize" placeholder="e.g., XL" style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 6px; box-sizing: border-box; font-size: 1rem; background: #fcfcfc;">
+  </div>
+
+  <div class="form-group" style="margin-bottom: 16px;">
+    <label style="display: block; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; color: #666;">Image URL</label>
+    <input type="text" id="itemImageUrl" placeholder="Paste direct image link here" style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 6px; box-sizing: border-box; font-size: 1rem; background: #fcfcfc;">
+  </div>
+
+  <button id="uploadBtn" style="width: 100%; padding: 14px; background: #1a1a1a; color: #fff; border: none; border-radius: 6px; font-size: 1rem; font-weight: 500; cursor: pointer; margin-top: 10px;">Upload to Storefront</button>
+  <div class="status" id="statusMsg" style="margin-top: 15px; font-size: 0.9rem; text-align: center; color: #00aa66;"></div>
+</div>
+
+<script type="module">
+  // Import core SDK hooks dynamically from Google's CDN
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+  // Your verified database credentials
+  const firebaseConfig = {
+    apiKey: "AIzaSyACzRsZHCaM_rhNSJIFo0iplu43mEswybA",
+    authDomain: "urbandrip-thrift.firebaseapp.com",
+    projectId: "urbandrip-thrift",
+    storageBucket: "urbandrip-thrift.firebasestorage.app",
+    messagingSenderId: "78622501779",
+    appId: "1:78622501779:web:4d9fe0c41e4c4be014d666",
+    measurementId: "G-7MCW94NLSR"
+  };
+
+  // Launch the connections
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Monitor the click event on your upload button
+  document.getElementById('uploadBtn').addEventListener('click', async () => {
+    const name = document.getElementById('itemName').value;
+    const price = document.getElementById('itemPrice').value;
+    const size = document.getElementById('itemSize').value;
+    const imageUrl = document.getElementById('itemImageUrl').value;
+    const statusMsg = document.getElementById('statusMsg');
+
+    // Block the action if a field is completely blank
+    if(!name || !price || !size || !imageUrl) {
+      alert("Please fill out all fields!");
+      return;
+    }
+
+    statusMsg.innerText = "Connecting to backend and uploading...";
+
+    try {
+      // Send data package directly into your Firestore "products" collection
+      await addDoc(collection(db, "products"), {
+        title: name,
+        price: Number(price),
+        size: size,
+        image: imageUrl,
+        createdAt: serverTimestamp()
+      });
+
+      statusMsg.innerText = "✨ Item added successfully!";
+      
+      // Wipe fields clear for the next entry
+      document.getElementById('itemName').value = '';
+      document.getElementById('itemPrice').value = '';
+      document.getElementById('itemSize').value = '';
+      document.getElementById('itemImageUrl').value = '';
+
+    } catch (error) {
+      console.error("Database connection error: ", error);
+      statusMsg.style.color = "#ff3333";
+      statusMsg.innerText = "❌ Upload failed. Look at console log for errors.";
+    }
+  });
+</script>
 </html>
